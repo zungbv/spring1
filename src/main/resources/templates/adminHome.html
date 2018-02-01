@@ -1,0 +1,212 @@
+<!DOCTYPE html >
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous"></link>
+
+    <title>Quản lý người dùng</title>
+</head>
+<body>
+<div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light"> <a
+            class="navbar-brand" href="admin">Admin Home</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse"
+                data-target="#navbarSupportedContent"
+                aria-c ontrols="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active"><a class="nav-link" href="#">Người
+                    dùng <span class="sr-only">(current)</span>
+                </a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Phân quyền</a></li>
+                <li class="nav-item dropdown"><a
+                        class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+                        role="button" data-toggle="dropdown" aria-haspopup="true"
+                        aria-expanded="false" th:text="${username}"></a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Đổi password</a> <a
+                            class="dropdown-item" th:href="@{/logout}">Log out</a>
+                    </div></li>
+            </ul>
+        </div>
+    </nav>
+    <hr/>
+    <table class="table table-bordered table-hover">
+        <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">First</th>
+            <th scope="col">Last</th>
+            <th scope="col">Address</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Email</th>
+            <th scope="col" colspan="2">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+
+            <tr th:each="user,status:${users}">
+                <td th:id="|user_id${status.index}|" th:text="${user.user_id}"></td>
+                <td th:id="|firstName${status.index}|" th:text="${user.firstName}"></td>
+                <td th:id="|lastName${status.index}|" th:text="${user.lastName}"></td>
+                <td th:id="|address${status.index}|" th:text="${user.address}"></td>
+                <td th:id="|phone${status.index}|" th:text="${user.phone}"></td>
+                <td th:id="|email${status.index}|" th:text="${user.email}"></td>
+
+                <td ><a href="#" th:onclick="|fillForm(${status.index})|">Edit</a></td>
+                <td ><a href="#" th:onclick="|deleteUser(${status.index})|">Delete</a></td>
+
+            <input type="hidden" th:id="|image${status.index}|" th:value="${user.image}"/>
+            <input type="hidden" th:id="|username${status.index}|" th:value="${user.username}"/>
+            </tr>
+        </tbody>
+    </table>
+
+
+    <hr>
+    <hr>
+    <div class="row">
+        <div class="col-8">
+            <form th:object="${user}" method="post"
+                       th:action="@{/admin/updateUserInfo}">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="firstName">First Name</label>
+                        <input type="text" class="form-control" id="firstName"
+                                    th:field="*{firstName}" />
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" class="form-control" id="lastName"
+                                    th:field="*{lastName}" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="address">Address</label>
+                        <input type="text"
+                                    class="form-control" id="address" th:field="*{address}" />
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="phone">Phone Number</label>
+                        <input type="text" pattern="[0-9]{9,}"
+                                    class="form-control" id="phone" th:field="*{phone}" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <label for="email">Email</label>
+                        <div class="input-group">
+                            <input type="email" class="form-control"
+                                        id="email" readonly="true" th:field="*{email}" />
+                            <div class="input-group-append">
+                                <button data-toggle="modal" data-target="#confirmPasswordModal"
+                                        class="btn btn-outline-secondary" type="button">Edit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <input readonly="true" type="hidden" class="username" th:field="*{username}" />
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+
+            <div class="modal fade" id="confirmPasswordModal" tabindex="-1"
+                 role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <div id="updateUserEmailMessage" style="color: red"></div>
+                            <form id="updateUserEmailForm" method="post">
+                                <div class="form-group">
+                                    <label for="newEmail">New Email</label> <input type="email"
+                                                                                   class="form-control" id="newEmail" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmPassword">Confirm Password</label> <input
+                                        type="password" pattern="^(?=.*\d).{4,}$"
+                                        class="form-control" id="confirmPassword" th:required="required"
+                                         />
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </form>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-4">
+            <div class="form-group"></div>
+            <form method="POST" th:action="@{/admin/updateUserImage}"
+                  enctype="multipart/form-data">
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <a href="" data-toggle="modal" data-target="#userImageModal"><img
+                                src="" alt="your image" class="form-control" class="userImage"
+                                style="max-width: 100%"></a>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="userImageModal" tabindex="-1"
+                             role="dialog" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-body" style="text-align: center">
+                                        <img src="" style="max-width: 100%" class="userImage">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <input type="file" name="file" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <input readonly type="hidden" name="username" class="username" />
+                        <input class="btn btn-success" type="submit" value="Save" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+<script
+        src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script
+        src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script
+        src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+<script th:src="@{/res/js/adminHome.js}"></script>
+</body>
+</html>
