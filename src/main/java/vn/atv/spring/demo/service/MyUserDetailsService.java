@@ -1,16 +1,19 @@
 package vn.atv.spring.demo.service;
 
+import org.apache.poi.ss.usermodel.Workbook;
 import vn.atv.spring.demo.model.User;
 
 import java.util.List;
+import java.util.Map;
 
 public interface MyUserDetailsService {
-    public User getUserByUsername(String username);
-    public List<User> getAllUsers(String adminUsername);
-    public void updateImage(String username, String imageFileName);
-    public void updateInfo(User user);
-    public boolean updateEmail(String newEmail, String confirmPassword, User user);
-    public boolean updateEmailByAdmin(String newEmail, String confirmPassword, User admin, String username);
+    User getUserByUsername(String username);
+    List<User> getAllUsers(String adminUsername);
+    void updateImage(String username, String imageFileName);
+    void updateInfo(User user);
+    boolean updateEmail(String newEmail, String confirmPassword, User user);
+    boolean updateEmailByAdmin(String newEmail, String confirmPassword, User admin, String username);
 
-    public boolean deleteUser(String username);
+    boolean deleteUser(String username);
+    Workbook createUserListWorkBook(Map<String, Object> map);
 }

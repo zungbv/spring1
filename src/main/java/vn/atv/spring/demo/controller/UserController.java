@@ -1,38 +1,29 @@
 package vn.atv.spring.demo.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.Principal;
-import java.util.List;
-
-
-import javax.servlet.http.HttpSession;
-
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
-
 import vn.atv.spring.demo.model.User;
 import vn.atv.spring.demo.service.MyUserDetailsService;
-import vn.atv.spring.demo.view.UserExcelView;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 @Configuration
 @Controller
@@ -122,15 +113,20 @@ public class UserController {
 		
 	}
 	@GetMapping("admin/userList.xlsx")
-	public String getUserListInExcelFile(Model model, Principal principal, HttpSession session){
+	public @ResponseBody void getUserListInExcelFile(Principal principal, HttpSession session, HttpServletResponse response) throws IOException {
 		List<User> users;
 		if(session.getAttribute("users")==null){
 			users = myUserService.getAllUsers(principal.getName());
 		}else{
 			users=(List<User>)session.getAttribute("users");
 		}
-		model.addAttribute("users",users);
-		return "userList.xlsx";
+        Map<String,Object> map=new HashMap<>();
+		map.put("users",users);
+        Workbook workbook=myUserService.createUserListWorkBook(map);
+        response.setContentType("application/ms-excel");
+        response.setHeader("Content-disposition","attachment;filename=userList.xlsx");
+        workbook.write(response.getOutputStream());
+
 	}
 	
 	
