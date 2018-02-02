@@ -27,10 +27,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 import vn.atv.spring.demo.model.User;
 import vn.atv.spring.demo.service.MyUserDetailsService;
+import vn.atv.spring.demo.view.UserExcelView;
 
 @Configuration
 @Controller
@@ -119,11 +121,23 @@ public class UserController {
 		return myUserService.updateEmail(newEmail, confirmPassword,(User)session.getAttribute("user"));
 		
 	}
+	@GetMapping("admin/userList.xlsx")
+	public String getUserListInExcelFile(Model model, Principal principal, HttpSession session){
+		List<User> users;
+		if(session.getAttribute("users")==null){
+			users = myUserService.getAllUsers(principal.getName());
+		}else{
+			users=(List<User>)session.getAttribute("users");
+		}
+		model.addAttribute("users",users);
+		return "userList.xlsx";
+	}
 	
 	
 	@GetMapping("/admin")
-	public String getAdminHome(Model model, Principal principal, @ModelAttribute("user") User user) {
+	public String getAdminHome(Model model, Principal principal, @ModelAttribute("user") User user, HttpSession session) {
 		List<User> users = myUserService.getAllUsers(principal.getName());
+        session.setAttribute("users",users);
 		model.addAttribute("users", users);
 		model.addAttribute("username", principal.getName());
 		return "adminHome";
